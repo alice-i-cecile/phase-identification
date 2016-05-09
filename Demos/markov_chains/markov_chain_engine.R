@@ -363,3 +363,47 @@ generate_mc <- function(n=16, prob=1, graph_type="random", ...){
 
 
 # Generating data from markov chains ####
+
+# Wrapper for advancing Markov chains
+advance_mc <- function(mc, initial_state = NA, steps = 1, deterministic = TRUE){
+    
+    # Pick a state at random to begin in if none is given
+    if (is.na(initial_state)) {
+        initial_state <- matrix(rep.int(0, length(mc@states)), nrow = 1)
+        initial_state[1, sample(length(initial_state), 1)] <- 1
+        colnames(initial_state) <- mc@states
+    }
+    
+    # Store states as they're created
+    state_list <- list(length = (1 + steps))
+    state_list[[1]] <- initial_state
+    names(state_list) <- NULL # Ensure that initial state is not named
+    
+    # Deterministic: just multiply matrices
+    # Stochastic: sample with replacement according to weights of predicted values (rmultinom)
+    
+    for (i in 2:(steps + 1)) {
+        proposed_state <- state_list[[i - 1]] * mc
+        
+        if (deterministic) {
+            state_list[[i]] <- proposed_state
+        } else { 
+            state_list[[i]] <- rmultinom(1, size = sum(initial_state), prob = proposed_state)
+        }
+    }
+    
+    state_df <- Reduce(rbind, state_list)
+    state_df$Steps <- 0:steps
+
+    return(state_df)    
+}
+
+
+# Sample from the Markov chain, assuming it has reached stationarity
+sample_mc_stationary <- function(mc, steps=1){
+    
+    state_df <- rmarkovchain(steps + 1, mc)
+    state_df$Steps <- 0:steps
+    
+    return(state_df)
+}
