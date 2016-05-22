@@ -299,6 +299,16 @@ tree_graph <- function(n){
     return(adjacency)
 }
 
+
+# Stochastic block model graph
+# https://en.wikipedia.org/wiki/Stochastic_block_model
+blockmodel_graph <- function(n, n_clusters = 3, n_connections = 1, subgraph_type="smallworld", ...){
+    
+    adjacency <- NULL
+    
+    return(adjacency)
+}
+
 # Clustered adjacency graph
 # Created out of several smaller graphs
 cluster_graph <- function(n, n_clusters = 3, n_connections = 1, subgraph_type="smallworld", ...){
@@ -313,7 +323,8 @@ cluster_graph <- function(n, n_clusters = 3, n_connections = 1, subgraph_type="s
                              "lattice" = lattice_graph,
                              "ring" = ring_graph,
                              "smallworld" = smallworld_graph,
-                             "tree" = tree_graph
+                             "tree" = tree_graph,
+                             "blockmodel" = blockmodel_graph
     )
     
     
@@ -324,6 +335,7 @@ cluster_graph <- function(n, n_clusters = 3, n_connections = 1, subgraph_type="s
     
     return(adjacency)
 }
+
 
 # Wrapper
 generate_mc <- function(n=16, prob=1, graph_type="random", ...){
@@ -395,7 +407,7 @@ advance_mc <- function(mc, initial_state = NA, steps = 1, deterministic = TRUE){
     state_df <- Reduce(rbind, state_list)
     state_df$Steps <- 0:steps
 
-    return(state_df)    
+    return(state_df)
 }
 
 
