@@ -37,21 +37,17 @@ MarkovKernel <- setRefClass("MarkovKernel",
                             
                             
     fields = list(data = data.frame(),
-                  domain = detect_domain(data),
+                  domain = detect_domain(data), # Don't need. Solved by MCMC
                   hitting_times = NULL
     ),
     
     methods = list(
         
-        # Initialization method
-        initialize <- function(epsilon = 0, ...){
-            
-            # Only compute hitting times when initialized for the first time
-            if (!is.null(hitting_times)) {
-                hitting_times <<- compute_hitting_times(epsilon)
-            }
+        # Initialization function
+        # Enforces quality checks
+        initialize <- function(){
             return(NULL)
-        },
+        }
         
         # transition(a,b) returns the transition probability to get from a to b
         # Domain == codomain; set of all possible system states
@@ -62,6 +58,7 @@ MarkovKernel <- setRefClass("MarkovKernel",
         
         # random_step(a) returns a random point, as if walking 1 step from state a
         # Current implementation is lazy algorithm for continuous spaces
+        # Should use MCMC instead
         random_step <- function(a, sample_size = 1000){
             
             candidate_points <- random_point(sample_size, domain)
@@ -70,7 +67,15 @@ MarkovKernel <- setRefClass("MarkovKernel",
             
             selected_point <- sample(candidate_points, size = 1, prob = probabilities)
             
-            return(selected_point)  
+            return(selected_point)
+        },
+        
+        
+        # Returns a random point from the stationary distribution of the markov kernel
+        # Allow for generation of multiple points at once for easier optimization
+        # Format is identical to that received in data
+        stationary_sample <- function(n=1){
+            return()
         },
         
         # Hitting time method
@@ -84,7 +89,7 @@ MarkovKernel <- setRefClass("MarkovKernel",
                 i <- a
                 steps <- 0
                 
-                while (i != b) {
+                while (transition(a,b) > epsilon) {
                     i <- random_step(i)
                     steps <- steps + 1
                 }
@@ -109,11 +114,16 @@ MarkovKernel <- setRefClass("MarkovKernel",
             }
             
             return(dist_matrix)
+        },
+        
+        # Check for phi-irreducibility
+        # Returns disjoint subsystems if they exist
+        # Will likely need to be probabilistic?
+        # Is this just the same problem again? Does it matter?
+        phi_reducibility <- function(){
+            return(NULL)
         }
     )    
-
-    
-    
 )
 
 
